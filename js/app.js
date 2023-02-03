@@ -27,7 +27,6 @@ Seguro.prototype.cotizarSeguro = function() {
             case '3':
                 cantidad = base * 1.35;
                 break;
-
             default:
                 break;
         }
@@ -49,8 +48,6 @@ Seguro.prototype.cotizarSeguro = function() {
         cantidad *= 1.50;
     }
     return cantidad;
-
-        console.log(cantidad);
 }
 
 function UI() {};
@@ -72,12 +69,13 @@ UI.prototype.llenarOpciones = () => {
 
 /* ---- Muestra alertas en pantalla ---- */
 UI.prototype.mostrarMensaje = (mensaje, tipo) => {
+
     const div = document.createElement('div');
     
     if(tipo === 'error') {
-        div.classList.add('mensaje', 'error');
+        div.classList.add('error');
     } else {
-        div.classList.add('mensaje', 'correcto');
+        div.classList.add('correcto');
     }
 
     div.classList.add('mensaje', 'mt-10');
@@ -88,25 +86,48 @@ UI.prototype.mostrarMensaje = (mensaje, tipo) => {
     formulario.insertBefore(div, document.querySelector('#resultado'));
 
     setTimeout(() => {
-        div.remove();
+        div.remove(); // Se borra el spinner
+    }, 3000);
+}
+
+UI.prototype.mostrarResultado = (total, seguro) => {
+
+    // Crear el resultado
+    const div = document.createElement('div');
+    div.classList.add('mt-10');
+
+    div.innerHTML = `
+        <p class="header">Tu Resumen</p>
+        <p class="font-bold">Total: ${total}</p>
+    `; 
+
+    const resultadoDiv = document.querySelector('#resultado');
+
+    
+    // Mostrar spinner
+    const spinner = document.querySelector('#cargando');
+    spinner.style.display = 'block';
+    
+    setTimeout(() => {
+        spinner.style.display = 'none';
+        resultadoDiv.appendChild(div);
     }, 3000);
 }
 
 
 /* ---- Instanciar UI ---- */
 const ui = new UI();
-console.log(ui);
-
 
 document.addEventListener('DOMContentLoaded', () => {
     ui.llenarOpciones(); // Llena el select con los años
 })
 
-eventListeners();
 function eventListeners() {
     const formulario = document.querySelector('#cotizar-seguro');
     formulario.addEventListener('submit', cotizarSeguro);
 }
+
+eventListeners();
 
 function cotizarSeguro(e) {
     e.preventDefault();
@@ -128,11 +149,19 @@ function cotizarSeguro(e) {
 
     ui.mostrarMensaje('Cotizando...', 'exito');
 
+    // Ocultar las cotizaciones previas
+    const resultados = document.querySelector('#resultado div')
+    if(resultados != null) {
+        resultados.remove();
+    }
+
     /* ---- Instanciar el seguro ---- */
     const seguro = new Seguro(marca, year, tipo);
-    seguro.cotizarSeguro();
+    const total = seguro.cotizarSeguro();
 
 
 
     // Utilizar el prototype que va a cotizar 
+    ui.mostrarResultado(total, seguro);
+
 }
